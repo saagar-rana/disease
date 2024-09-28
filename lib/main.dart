@@ -1,7 +1,8 @@
 import 'dart:io';
-
+import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+// ignore: depend_on_referenced_packages
 import 'package:pytorch_lite/pytorch_lite.dart';
 
 void main() {
@@ -59,7 +60,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   ClassificationModel? _imageModel;
   String? _imagePrediction;
 
@@ -69,44 +69,64 @@ class _MyHomePageState extends State<MyHomePage> {
     loadModel();
   }
 
-Future<void> loadModel() async {
-  String pathImageModel = "assets/model.pt";
-  try {
-    _imageModel = await PytorchLite.loadClassificationModel(
-        pathImageModel, 224, 224,
-        labelPath: "assets/labels_classification.txt");
-        print('donme');
-  } on PlatformException {
+  Future<void> loadModel() async {
+    String pathImageModel = "assets\\torchscript_edgenext_xx_small.pt";
+    try {
+      _imageModel = await PytorchLite.loadClassificationModel(
+          pathImageModel, 224, 224,10,
+          labelPath: "assets/labels_classification.txt");
+      print('donme');
+    } on PlatformException {
       print("only supported for android");
     }
-}
-
-  Future getClassify() async{
-    
-    // Load the image as bytes (example from assets)
-  ByteData byteData = await rootBundle.load(r'assets\images\digital_camera_photo-1080x675.jpg');
-  Uint8List imageBytes = byteData.buffer.asUint8List();
-
-  // Assuming _imageModel is your loaded PyTorch model
-  String? result;
-  try {
-    // Call the getImagePrediction method
-    result = await _imageModel!.getImagePrediction(
-      imageBytes,
-    );
-    print("Prediction Result: $result");
-  } catch (e) {
-    print("Error during image prediction: $e");
   }
+
+//   Future<Uint8List> preprocess(Uint8List imageBytes) async {
+//   // Decode image
+//   img.Image? image = img.decodeImage(imageBytes);
+
+//   if (image == null) {
+//     throw Exception("Unable to decode image");
+//   }
+
+//   // Step 1: Resize the image to (256, 256)
+//   img.Image resizedImage = img.copyResize(image, width: 256, height: 256);
+  
+// print(resizedImage.length);
+
+//   // Step 3: Normalize the image (optional, handled in model)
+//   // Normalization with the given mean and std can be handled later in the model
+
+//   // Step 4: Convert back to Uint8List
+//   Uint8List processedImageBytes = Uint8List.fromList(img.encodeJpg(resizedImage));
+  
+
+//   return processedImageBytes;
+// }
+
+  Future getClassify() async {
+    // Load the image as bytes (example from assets)
+    ByteData byteData =
+        await rootBundle.load(r'assets\images\narrow_brown (16).jpg');
+    Uint8List imageBytes = byteData.buffer.asUint8List();
+
+    // Uint8List preprocessedImage = await preprocess(imageBytes);
+    // Assuming _imageModel is your loaded PyTorch model
+    String? result;
+    try {
+      // Call the getImagePrediction method
+      result = await _imageModel!.getImagePrediction(
+        imageBytes,
+      );
+      print("Prediction Result: ${imageBytes.length}");
+    } catch (e) {
+      print("Error during image prediction: $e");
+    }
 
     setState(() {
       _imagePrediction = result;
-    
     });
   }
-
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +166,7 @@ Future<void> loadModel() async {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'You have pushed the button this many times:',
+              'Prediction:',
             ),
             Text(
               '$_imagePrediction',
