@@ -1,8 +1,9 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'package:image/image.dart' as img;
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-// ignore: depend_on_referenced_packages
 import 'package:pytorch_lite/pytorch_lite.dart';
 
 void main() {
@@ -12,27 +13,11 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
@@ -44,15 +29,6 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
   final String title;
 
   @override
@@ -61,7 +37,19 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   ClassificationModel? _imageModel;
+  final ImagePicker _picker = ImagePicker();
   String? _imagePrediction;
+  double? _imageNum;
+  List<String> diseases= ['bacterial_leaf_blight',
+'brown_spot',
+'healthy',
+'leaf_blast',
+'leaf_scald',
+'narrow_brown_spot',
+'neck_blast',
+'rice_hispa',
+'sheath_blight',
+'tungro'];
 
   @override
   void initState() {
@@ -75,111 +63,92 @@ class _MyHomePageState extends State<MyHomePage> {
       _imageModel = await PytorchLite.loadClassificationModel(
           pathImageModel, 224, 224,10,
           labelPath: "assets/labels_classification.txt");
-      print('donme');
+      print('done');
     } on PlatformException {
       print("only supported for android");
     }
   }
 
-//   Future<Uint8List> preprocess(Uint8List imageBytes) async {
-//   // Decode image
-//   img.Image? image = img.decodeImage(imageBytes);
+  // Future getClassify() async {
+  //   // Load the image as bytes (example from assets)
+  //   ByteData byteData =
+  //       await rootBundle.load(r'assets\images\narrow_brown (16).jpg');
+  //   Uint8List imageBytes = byteData.buffer.asUint8List();
 
-//   if (image == null) {
-//     throw Exception("Unable to decode image");
-//   }
+  //   // Uint8List preprocessedImage = await preprocess(imageBytes);
+  //   // Assuming _imageModel is your loaded PyTorch model
+  //   String? result;
+  //   try {
+  //     // Call the getImagePrediction method
+  //     result = await _imageModel!.getImagePrediction(
+  //       imageBytes,
+  //     );
+  //     print("Prediction Result: ${imageBytes.length}");
+  //   } catch (e) {
+  //     print("Error during image prediction: $e");
+  //   }
 
-//   // Step 1: Resize the image to (256, 256)
-//   img.Image resizedImage = img.copyResize(image, width: 256, height: 256);
-  
-// print(resizedImage.length);
+  //   setState(() {
+  //     _imagePrediction = result;
+  //   });
+  // }
 
-//   // Step 3: Normalize the image (optional, handled in model)
-//   // Normalization with the given mean and std can be handled later in the model
+  Future pickerClassify() async{
 
-//   // Step 4: Convert back to Uint8List
-//   Uint8List processedImageBytes = Uint8List.fromList(img.encodeJpg(resizedImage));
-  
+    
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
 
-//   return processedImageBytes;
-// }
-
-  Future getClassify() async {
-    // Load the image as bytes (example from assets)
-    ByteData byteData =
-        await rootBundle.load(r'assets\images\narrow_brown (16).jpg');
-    Uint8List imageBytes = byteData.buffer.asUint8List();
-
-    // Uint8List preprocessedImage = await preprocess(imageBytes);
-    // Assuming _imageModel is your loaded PyTorch model
-    String? result;
-    try {
-      // Call the getImagePrediction method
-      result = await _imageModel!.getImagePrediction(
-        imageBytes,
+    var result = await _imageModel!.getImagePrediction(
+        await File(image!.path).readAsBytes(),
       );
-      print("Prediction Result: ${imageBytes.length}");
-    } catch (e) {
-      print("Error during image prediction: $e");
-    }
 
+  
+    var index = diseases.indexOf(result.trim());
+      
+
+    var probability = await _imageModel!.getImagePredictionListProbabilities( await File(image.path).readAsBytes());
+
+    var num = probability[index]*100;
+
+       
+          
     setState(() {
       _imagePrediction = result;
+      _imageNum = num;
     });
+
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
+  
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
+
         title: Text(widget.title),
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
               'Prediction:',
             ),
             Text(
-              '$_imagePrediction',
+              '$_imagePrediction /n $_imageNum',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: getClassify,
+        onPressed: pickerClassify,
         tooltip: 'Increment',
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ), 
     );
   }
 }
