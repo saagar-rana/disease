@@ -1,0 +1,94 @@
+{
+    "diseases": [
+      {
+        "name": "Bacterial Leaf Blight",
+        "description": "A severe disease affecting rice, caused by the bacterium Xanthomonas oryzae. Symptoms include yellowing of leaf tips, water-soaked lesions, and eventual death of the leaves.",
+        "remedies": [
+          "Use resistant varieties of rice.",
+          "Apply copper-based fungicides.",
+          "Practice crop rotation and field sanitation."
+        ]
+      },
+      {
+        "name": "Brown Spot",
+        "description": "Caused by the fungus Bipolaris oryzae, this disease presents as brown, round spots on the leaves. It can lead to reduced yields if not managed properly.",
+        "remedies": [
+          "Apply fungicides at the first sign of disease.",
+          "Ensure proper drainage and avoid waterlogging.",
+          "Rotate crops to break the disease cycle."
+        ]
+      },
+      {
+        "name": "Healthy",
+        "description": "No disease symptoms are present. The plant is thriving and showing normal growth.",
+        "remedies": [
+          "Continue regular care and monitoring.",
+          "Ensure balanced fertilization and watering."
+        ]
+      },
+      {
+        "name": "Leaf Blast",
+        "description": "A serious fungal disease caused by Magnaporthe oryzae. It appears as diamond-shaped lesions on the leaves and can destroy the entire plant if untreated.",
+        "remedies": [
+          "Use resistant rice varieties.",
+          "Apply fungicides during early infection stages.",
+          "Maintain proper field hygiene and drainage."
+        ]
+      },
+      {
+        "name": "Leaf Scald",
+        "description": "Characterized by water-soaked lesions and necrosis of leaf margins, caused by the pathogen Microdochium oryzae.",
+        "remedies": [
+          "Use disease-resistant varieties.",
+          "Avoid excessive nitrogen fertilization.",
+          "Improve air circulation among plants."
+        ]
+      },
+      {
+        "name": "Narrow Brown Spot",
+        "description": "A fungal disease that causes narrow, elongated brown lesions on leaves. It can lead to significant yield loss.",
+        "remedies": [
+          "Apply appropriate fungicides.",
+          "Improve water management to reduce humidity.",
+          "Rotate crops to disrupt the disease cycle."
+        ]
+      },
+      {
+        "name": "Neck Blast",
+        "description": "A destructive disease affecting the neck of rice plants, caused by Magnaporthe oryzae. It leads to poor grain filling and reduced yields.",
+        "remedies": [
+          "Use resistant varieties.",
+          "Implement good water management practices.",
+          "Apply fungicides if necessary."
+        ]
+      },
+      {
+        "name": "Rice Hispa",
+        "description": "An insect pest (Dicladispa armigera) that causes damage to rice leaves, leading to reduced photosynthesis.",
+        "remedies": [
+          "Use insecticides if thresholds are exceeded.",
+          "Promote natural predators and biocontrol methods.",
+          "Implement integrated pest management strategies."
+        ]
+      },
+      {
+        "name": "Sheath Blight",
+        "description": "Caused by the fungus Rhizoctonia solani, it leads to lesions on the leaf sheath, affecting the plant's overall health.",
+        "remedies": [
+          "Apply fungicides as recommended.",
+          "Avoid excessive nitrogen use.",
+          "Practice crop rotation and field sanitation."
+        ]
+      },
+      {
+        "name": "Tungro",
+        "description": "A viral disease spread by leafhoppers, causing stunted growth and yellowing of rice plants.",
+        "remedies": [
+          "Control leafhopper populations with insecticides.",
+          "Use resistant rice varieties.",
+          "Remove infected plants to prevent spread."
+        ]
+      }
+    ]
+  }
+  

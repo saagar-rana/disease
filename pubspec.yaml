@@ -71,6 +71,7 @@ flutter:
     - assets\images\digital_camera_photo-1080x675.jpg
     - assets\images\healthy43.jpg
     - assets\images\narrow_brown (16).jpg
+    - assets\disease_data.json
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
 

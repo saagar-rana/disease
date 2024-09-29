@@ -1,6 +1,5 @@
-import 'dart:ffi';
 import 'dart:io';
-import 'package:image/image.dart' as img;
+import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,12 +15,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Sanjivani',
+      title: 'Dr. Biruwa',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.greenAccent),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'संजीवनी'),
+      home: const MyHomePage(title: 'Dr. Biruwa'),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -39,8 +38,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   ClassificationModel? _imageModel;
   final ImagePicker _picker = ImagePicker();
-  String? _imagePrediction;
-  double? _imageNum;
   List<String> diseases = [
     'Bacterial Leaf Blight',
     'Brown Spot',
@@ -128,14 +125,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                 ),
                 child: const Text(
-                  'SANJIVANI AI एउटा क्रान्तिकारी मोबाइल एप हो, '
-                  'जसले किसानहरूलाई वास्तविक समयमा बिरुवाका रोगहरू पत्ता लगाउन मद्दत गर्छ। '
-                  'उन्नत न्युरल नेटवर्कहरू प्रयोग गर्दै, SANJIVANI AI बिरुवाको तस्बिर विश्लेषण गर्छ '
-                  'र तुरुन्तै रोगको पहिचान र उपचारको सिफारिस दिन्छ। प्रारम्भमा धानमा केन्द्रित यो एप '
-                  'चाँडै नै अन्य धेरै बोटबिरुवा प्रजातिहरूमा विस्तार हुनेछ, र यसले बोटबिरुवाको वृद्धिको चरण पहिचान '
-                  'र अनुकूलित कृषि कल्याण तालिकाहरू जस्ता सुविधाहरू प्रदान गर्नेछ। SANJIVANI AI संग, किसानहरूले '
-                  'विशेषज्ञ स्तरको सल्लाहकार सेवाहरूको पहुँचमा हुन्छन्, जसले उनीहरूलाई स्वस्थ बाली पालन '
-                  'गर्न र उत्पादन बढाउन सघाउँछ।',
+                  'DR BIRUWA is a revolutionary mobile app designed to assist farmers by diagnosing plant diseases in real-time. Using advanced neural networks, DR BIRUWA analyzes plant images and provides instant diagnoses and treatment suggestions. Initially focused on rice and maize, the app will soon expand to cover a wide variety of plant species, offering features such as growth stage prediction and customized crop calendars. With DR BIRUWA, farmers have access to expert-level insights and advisory services 24/7, right in their pockets, empowering them to nurture healthy crops and maximize their yields.',
                   style: TextStyle(
                     fontSize: 15.0,
                     color: Colors.green, // Text color
@@ -160,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         SizedBox(
                           width: 10,
                         ),
-                        Text('क्यामराबाट फोटो लिनुहोस्',
+                        Text('From Camera',
                             style: TextStyle(fontSize: 16.0))
                       ],
                     ),
@@ -180,7 +170,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         SizedBox(
                           width: 10,
                         ),
-                        Text('ग्यालरीबाट फोटो लिनुहोस्',
+                        Text('From Gallery',
                             style: TextStyle(fontSize: 16.0))
                       ],
                     ),
@@ -242,7 +232,7 @@ class ResultScreen extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                                 builder: (BuildContext context) =>
-                                    const Description()));
+                                    Description(prediction: prediction)));
                       },
                       child: const Row(
                         children: [
@@ -259,15 +249,132 @@ class ResultScreen extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class Description extends StatelessWidget {
-  const Description({super.key});
+  final String prediction;
+
+  Description({super.key, required this.prediction});
+
+  Map<String, dynamic>? _diseaseData;
+  List<dynamic> diseases = [];
+  var diseaseInfo;
+  String? descrip;
+  List<dynamic>? remedies;
+
+  // Load disease data from JSON file
+  Future<void> loadDiseaseData() async {
+    String jsonString = await rootBundle.loadString('assets/disease_data.json');
+    _diseaseData = json.decode(jsonString);
+    diseases = _diseaseData?['diseases'];
+  }
+
+  Map<String, dynamic>? getDiseaseInfo(String diseaseName) {
+    for (var disease in diseases) {
+      if (disease['name'] == diseaseName) {
+        return disease;
+      }
+    }
+    return null; // Return null if disease is not found
+  }
 
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
-      appBar: AppBar(
-          title: Text('Description'),
-      ),
-    );
+    return FutureBuilder(
+        future: loadDiseaseData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            diseaseInfo = getDiseaseInfo(prediction.trim());
+            descrip = diseaseInfo?['description'];
+            remedies = diseaseInfo?['remedies'];
+
+            if (diseaseInfo == null) {
+              return Scaffold(
+                appBar: AppBar(title: const Text('Disease Info')),
+                body:
+                    Center(child: Text('No information found for $prediction')),
+              );
+            }
+          }
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Disease Info for $prediction'),
+              backgroundColor: Theme.of(context).colorScheme.inversePrimary, // Set app bar color
+            ),
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Title for Description
+                  Text(
+                    'Description',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green[800], // Set title color
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // Description Text
+                  Text(
+                    descrip ?? 'No description available',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      height: 1.5, // Line height for readability
+                      color: Colors.black87,
+                    ),
+                    textAlign: TextAlign.justify, // Justify the description
+                  ),
+                  const SizedBox(height: 20),
+                  // Title for Remedies
+                  Text(
+                    'Remedies',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green[800], // Set title color
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  // Remedies List
+                  remedies != null
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: remedies!
+                              .map((remedy) => Padding(
+                                    padding: const EdgeInsets.only(bottom: 8.0),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        const Text(
+                                          '• ', // Bullet point for each remedy
+                                          style: TextStyle(fontSize: 18),
+                                        ),
+                                        Expanded(
+                                          child: Text(
+                                            remedy,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              height: 1.5,
+                                              color: Colors.black87,
+                                            ),
+                                            textAlign: TextAlign.justify,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ))
+                              .toList(),
+                        )
+                      : const Text(
+                          'No remedies available',
+                          style: TextStyle(fontSize: 16, color: Colors.black87),
+                        ),
+                ],
+              ),
+            ),
+          );
+        });
   }
 }
